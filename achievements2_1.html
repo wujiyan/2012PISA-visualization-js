@@ -1,0 +1,942 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <script src="http://d3js.org/d3.v3.min.js"></script>
+  <script src="http://dimplejs.org/dist/dimple.v2.0.0.min.js"></script>
+    <style>
+      .axis path,
+      .axis line{
+        fill: none;
+        stroke:black;
+        shape-rendering: crispEdges;
+      }
+
+      .axis text{
+        font-family: sans-serif;
+        font-size:11px;
+      }
+
+      .float_chart{
+        float: left;
+        width:375px;
+        height:200px;
+        margin:20px;
+      }
+
+      .MyRect {
+        fill: steelblue;
+      }
+
+      h1.mainhead {
+        text-align: center;
+        color: black;
+      }
+
+      h2.text{
+        text-align:center;
+        color: black;
+      }
+
+      div.country_buttons {
+        position: absolute;
+        left: 5px;
+        width: 100px;
+      }
+
+      div.country_buttons div{
+        background-color: rgb(251, 201, 127);
+        padding: 3px;
+        margin: 7px;
+      }
+
+      div.type_buttons {
+        position: absolute;
+        left: 5px;
+        width: 100px;
+        float: left;
+      }
+
+      div.type_buttons div{
+        background-color: rgb(251, 201, 127);
+        padding: 3px;
+        margin: 7px;
+      }
+      .subject {
+        font-size: 14px; 
+        font-weight: bold;
+      }
+    </style>
+    <script type="text/javascript">  
+      function draw(data){
+
+        console.log(data);
+
+        /* write the main title */
+        d3.select("#mainTitle")
+          .append("h1")
+          .attr('class','mainhead')
+          .text("Visualization of PISA data");
+
+        /* define the width and height of each minichart */
+        var width = 375;
+        var height = 200;
+
+        /*define type list for creating the buttons */
+        var type_list = ['math','read','scie']
+
+        /* define gender type for creating bars and labels */
+        var gender_type = ['total','female','male']
+
+        /* define the padding for the chart */
+        var padding = {left:30, right:30, top:20, bottom:20};
+
+        /* define the padding for each bar */
+        var rectPadding = 4;
+
+        /* the countries that we care */
+        countrylist = ["Shanghai",'Singapore','HongKong','Taiwan','Korea','Macao','Japan']
+        
+        /*for(var i = 0; i < data.length ; i += 1){
+          countrylist.push(data[i].country)
+        }*/
+
+        /* define boolean variables for every charts, which determine whether 
+        it is necessary to create new charts */
+        var ballon1 = 1;
+        var ballon2 = 1;
+        var ballon3 = 1;
+        var ballon4 = 1;
+        var ballon5 = 1;
+        var ballon6 = 1;
+        var ballon7 = 1;
+        var textbal1 = 1;
+        var textbal2 = 1;
+        var textbal3 = 1;
+        var textbal4 = 1;
+        var textbal5 = 1;
+        var textbal6 = 1;
+        var textbal7 = 1;
+
+        margin = 40;
+
+        /* y axis scale */
+        var yScale2 = d3.scale.linear()
+        .domain([0, 3])
+        .range([margin, height-margin]);
+
+        /* x axis scale */
+        var xScale2 = d3.scale.linear()
+        .domain([0,650])
+        .range([0, width-padding.left-margin]);
+
+        /* update charts according to the type list containing math, read, scie */
+        function update(type){
+
+          /* define a function returning the index of a country
+            input: 
+                country: the country name
+                obj: the data set used
+            output:
+                the index of the country in the obj dataset */
+          function index(country, obj){
+                  for(var i = 0;i < obj.length;i++){
+                    if (obj[i]['country'] == country) {
+                      return i;
+                       }
+                    }
+                  }
+
+          /*************************************************/
+          /******* create the 1st minichart, Shanghai ******/
+          /*************************************************/
+          var rect1;
+
+          /* If there is no chart, create a new one; otherwise, just update the current chart */
+          if (ballon1 == 1) {
+            /* if baloon is 1, then create the new chart */
+          var svg1 = d3.select('#miniChart1')
+                        .append('svg')
+                        .attr('width',width)
+                        .attr('height',height)
+                        .attr('class','svg1');
+
+          ballon1 = 0;
+          rect1 = svg1.selectAll('.MyRect')
+                      .data(gender_type)
+                      .enter().append('rect')
+                      .attr('class',"MyRect")
+                      .attr('transform','translate(' + padding.left + ',' + padding.top + ')')
+                      .attr('fill','steelblue');
+                    } else {
+                      /* otherwise, select the current bar chart */
+                      rect1 = d3.select('#miniChart1')
+                      .select('svg')
+                      .selectAll('.MyRect')
+          }
+
+          /* draw the bar chart */
+          rect1.attr('y', function(d,i){
+                return yScale2(i) + rectPadding/2;
+            })
+              .attr('x', function(d,i){
+                return 0;
+              })
+              .attr('height', 30 - rectPadding)
+              .attr('width', function(d,i){
+                var ind = index('Shanghai',data)
+                return xScale2(data[ind][d + '_' + type]);
+              })
+          /* create x axis */
+          var xAxis2 = d3.svg.axis()
+                          .scale(xScale2)
+                          .orient('bottom');
+
+          d3.select('#miniChart1').select('svg')
+              .append('g')
+              .attr('class','axis')
+              .attr('transform', "translate(" + padding.left + "," + padding.top + ")")
+              .call(xAxis2);
+
+          /* add the title showing the country or region name */
+          d3.select('#miniChart1').select('svg')
+              .append('text')
+              .attr('x',(width/2))
+              .attr('y', 10)
+              .attr('text-anchor','middle')
+              .attr('font-size','14px')
+              .text('Shanghai');
+
+          /* add the subject name for each bar, total, female, male*/
+          d3.select('#miniChart1').select('svg')
+              .selectAll('.type_text')
+              .data(gender_type)
+              .enter()
+              .append('text')
+              .attr('x', 120)
+              .attr('y',function(d,i){
+                return yScale2(i) + margin;
+              })
+              .text(function(d){
+                return d;
+              })
+              .attr('font-size','14px')
+
+          /* create score labels */    
+          if (textbal1 == 1){
+            var text1 = d3.select('#miniChart1').select('svg')
+                          .selectAll('.bartext1')
+                          .data(gender_type)
+                          .enter()
+                          .append('text')
+                          .attr('class','bartext1');
+            textbal1 = 0;
+          }    else {
+            text1 = d3.select('#miniChart1').selectAll('.bartext1');
+          }
+
+          text1.attr('x', function(d){
+                /* got the index of the country */
+                var ind = index('Shanghai',data)
+                return xScale2(data[ind][d + '_' + type])-10;   /* at the right side of the bar*/
+              })
+              .attr('y', function(d,i){
+                return yScale2(i) + margin;    /* same as the corresponding bar */
+              })
+              .attr('font-family','sans-serif')
+              .attr('font-size','11px')
+              .attr('fill','white')
+              .text(function(d,i){
+                /* got the index of the country */
+                var ind = index('Shanghai',data)
+
+                /* text should be the scores, like, data[3][total_math]*/
+                return data[ind][d + '_' + type].toFixed(2);  
+              }); 
+
+          /*************************************************/
+          /******* create the 2nd minichart, Singapore *****/
+          /*************************************************/
+
+          var rect2;
+          /* If there is no chart, create a new one; otherwise, just update the current chart */
+          if (ballon2 == 1) {
+            /* if baloon is 1, then create the new chart */
+          var svg2 = d3.select('#miniChart2')
+                        .append('svg')
+                        .attr('width',width)
+                        .attr('height',height)
+                        .attr('class','svg2');
+
+          ballon2 = 0;
+          rect2 = svg2.selectAll('.MyRect')
+                      .data(gender_type)
+                      .enter().append('rect')
+                      .attr('class',"MyRect")
+                      .attr('transform','translate(' + padding.left + ',' + padding.top + ')')
+                      .attr('fill','steelblue');
+            } else {
+              /* otherwise, select the current bar chart */
+              rect2 = d3.select('#miniChart2')
+                     .select('svg')
+                     .selectAll('.MyRect')
+            }
+
+            /* draw the bar chart */
+          rect2.attr('y', function(d,i){
+                return yScale2(i) + rectPadding/2;
+            })
+              .attr('x', function(d,i){
+                return 0;
+              })
+              .attr('height', 30 - rectPadding)
+              .attr('width', function(d,i){
+                var ind = index('Singapore',data)
+                return xScale2(data[ind][d + '_' + type]);
+              })
+
+            /* create x axis */
+          d3.select('#miniChart2').select('svg')
+              .append('g')
+              .attr('class','axis')
+              .attr('transform', "translate(" + padding.left + "," + padding.top + ")")
+              .call(xAxis2);
+          /* add the title showing the country or region name */
+          d3.select('#miniChart2').select('svg')
+              .append('text')
+              .attr('x',(width/2))
+              .attr('y', 10)
+              .attr('text-anchor','middle')
+              .attr('font-size','14px')
+              .text('Singapore');
+
+          /* add the subject name for each bar, total, female, male*/
+          d3.select('#miniChart2').select('svg')
+              .selectAll('.type_text')
+              .data(gender_type)
+              .enter()
+              .append('text')
+              .attr('x', 120)
+              .attr('y',function(d,i){
+                return yScale2(i) + margin;
+              })
+              .text(function(d){
+                return d;
+              })
+              .attr('font-size','14px')
+            /* create score labels */
+          if (textbal2 == 1){
+            var text2 = d3.select('#miniChart2').select('svg')
+                          .selectAll('.bartext2')
+                          .data(gender_type)
+                          .enter()
+                          .append('text')
+                          .attr('class','bartext2');
+            textbal2 = 0;
+          }    else {
+            text2 = d3.select('#miniChart2').selectAll('.bartext2');
+          }
+
+          text2.attr('x', function(d){
+                /* got the index of the country */
+                var ind = index('Singapore',data)
+                return -10 + xScale2(data[ind][d + '_' + type]);   /* at the right side of the bar*/
+              })
+              .attr('y', function(d,i){
+                return yScale2(i) + margin;    /* same as the corresponding bar */
+              })
+              .attr('font-family','sans-serif')
+              .attr('font-size','11px')
+              .attr('fill','white')
+              .text(function(d,i){
+                /* got the index of the country */
+                var ind = index('Singapore',data)
+
+                /* text should be the scores, like, data[3][total_math]*/
+                return data[ind][d + '_' + type].toFixed(2);  
+              }); 
+
+          /*************************************************/
+          /******* create the 3rd minichart, Hong Kong *****/
+          /*************************************************/
+
+          var rect3;
+          /* If there is no chart, create a new one; otherwise, just update the current chart */
+          if (ballon3 == 1) {
+            /* if baloon is 1, then create the new chart */
+          var svg3 = d3.select('#miniChart3')
+                        .append('svg')
+                        .attr('width',525)
+                        .attr('height',180)
+                        .attr('class','svg3');
+
+          ballon3 = 0;
+          rect3 = svg3.selectAll('.MyRect')
+                      .data(gender_type)
+                      .enter().append('rect')
+                      .attr('class',"MyRect")
+                      .attr('transform','translate(' + padding.left + ',' + padding.top + ')')
+                      .attr('fill','steelblue');
+            } else {
+              /* otherwise, select the current bar chart */
+              rect3 = d3.select('#miniChart3')
+                     .select('svg')
+                     .selectAll('.MyRect')
+            }
+
+            /* draw the bar chart */
+          rect3.attr('y', function(d,i){
+                return yScale2(i) + rectPadding/2;
+            })
+              .attr('x', function(d,i){
+                return 0;
+              })
+              .attr('height', 30 - rectPadding)
+              .attr('width', function(d,i){
+                var ind = index('HongKong',data)
+                return xScale2(data[ind][d + '_' + type]);
+              })
+
+            /* create x axis */
+          d3.select('#miniChart3').select('svg')
+              .append('g')
+              .attr('class','axis')
+              .attr('transform', "translate(" + padding.left + "," + padding.top + ")")
+              .call(xAxis2);
+
+              /* add the title showing the country or region name */
+          d3.select('#miniChart3').select('svg')
+              .append('text')
+              .attr('x',(width/2))
+              .attr('y', 10)
+              .attr('text-anchor','middle')
+              .attr('font-size','14px')
+              .text('HongKong');
+
+          /* add the subject name for each bar, total, female, male*/
+          d3.select('#miniChart3').select('svg')
+              .selectAll('.type_text')
+              .data(gender_type)
+              .enter()
+              .append('text')
+              .attr('x', 120)
+              .attr('y',function(d,i){
+                return yScale2(i) + margin;
+              })
+              .text(function(d){
+                return d;
+              })
+              .attr('font-size','14px')
+
+            /* create score labels */
+          if (textbal3 == 1){
+            var text3= d3.select('#miniChart3').select('svg')
+                          .selectAll('.bartext3')
+                          .data(gender_type)
+                          .enter()
+                          .append('text')
+                          .attr('class','bartext3');
+            textbal3 = 0;
+          }    else {
+            text3 = d3.select('#miniChart3').selectAll('.bartext3');
+          }
+
+          text3.attr('x', function(d){
+                /* got the index of the country */
+                var ind = index('HongKong',data)
+                return -10 + xScale2(data[ind][d + '_' + type]);   /* at the right side of the bar*/
+              })
+              .attr('y', function(d,i){
+                return yScale2(i) + margin;    /* same as the corresponding bar */
+              })
+              .attr('font-family','sans-serif')
+              .attr('font-size','11px')
+              .attr('fill','white')
+              .text(function(d,i){
+                /* got the index of the country */
+                var ind = index('HongKong',data)
+
+                /* text should be the scores, like, data[3][total_math]*/
+                return data[ind][d + '_' + type].toFixed(2);  
+              }); 
+
+          /*************************************************/
+          /******* create the 4th minichart, Taiwan ********/
+          /*************************************************/
+
+          var rect4;
+          /* If there is no chart, create a new one; otherwise, just update the current chart */
+          if (ballon4 == 1) {
+            /* if baloon is 1, then create the new chart */
+          var svg4 = d3.select('#miniChart4')
+                        .append('svg')
+                        .attr('width',525)
+                        .attr('height',180)
+                        .attr('class','svg4');
+
+          ballon4 = 0;
+          rect4 = svg4.selectAll('.MyRect')
+                      .data(gender_type)
+                      .enter().append('rect')
+                      .attr('class',"MyRect")
+                      .attr('transform','translate(' + padding.left + ',' + padding.top + ')')
+                      .attr('fill','steelblue');
+            } else {
+              /* otherwise, select the current bar chart */
+              rect4 = d3.select('#miniChart4')
+                     .select('svg')
+                     .selectAll('.MyRect')
+            }
+
+            /* draw the bar chart */
+          rect4.attr('y', function(d,i){
+                return yScale2(i) + rectPadding/2;
+            })
+              .attr('x', function(d,i){
+                return 0;
+              })
+              .attr('height', 30 - rectPadding)
+              .attr('width', function(d,i){
+                var ind = index('Taiwan',data)
+                return xScale2(data[ind][d + '_' + type]);
+              })
+
+            /* create x axis */
+          d3.select('#miniChart4').select('svg')
+              .append('g')
+              .attr('class','axis')
+              .attr('transform', "translate(" + padding.left + "," + padding.top + ")")
+              .call(xAxis2);
+            /* add the title showing the country or region name */
+          d3.select('#miniChart4').select('svg')
+              .append('text')
+              .attr('x',(width/2))
+              .attr('y', 10)
+              .attr('text-anchor','middle')
+              .attr('font-size','14px')
+              .text('Taiwan');
+
+          /* add the subject name for each bar, total, female, male*/
+          d3.select('#miniChart4').select('svg')
+              .selectAll('.type_text')
+              .data(gender_type)
+              .enter()
+              .append('text')
+              .attr('x', 120)
+              .attr('y',function(d,i){
+                return yScale2(i) + margin;
+              })
+              .text(function(d){
+                return d;
+              })
+              .attr('font-size','14px')
+            /* create score labels */
+          if (textbal4 == 1){
+            var text4= d3.select('#miniChart4').select('svg')
+                          .selectAll('.bartext4')
+                          .data(gender_type)
+                          .enter()
+                          .append('text')
+                          .attr('class','bartext4');
+            textbal4 = 0;
+          }    else {
+            text4 = d3.select('#miniChart4').selectAll('.bartext4');
+          }
+
+          text4.attr('x', function(d){
+                /* got the index of the country */
+                var ind = index('Taiwan',data)
+                return -10 + xScale2(data[ind][d + '_' + type]);   /* at the right side of the bar*/
+              })
+              .attr('y', function(d,i){
+                return yScale2(i) + margin;    /* same as the corresponding bar */
+              })
+              .attr('font-family','sans-serif')
+              .attr('font-size','11px')
+              .attr('fill','white')
+              .text(function(d,i){
+                /* got the index of the country */
+                var ind = index('Taiwan',data)
+
+                /* text should be the scores, like, data[3][total_math]*/
+                return data[ind][d + '_' + type].toFixed(2);  
+              }); 
+
+          /*************************************************/
+          /******* create the 5th minichart, Korea *********/
+          /*************************************************/
+
+          var rect5;
+          /* If there is no chart, create a new one; otherwise, just update the current chart */
+          if (ballon5 == 1) {
+            /* if baloon is 1, then create the new chart */
+          var svg5 = d3.select('#miniChart5')
+                        .append('svg')
+                        .attr('width',525)
+                        .attr('height',180)
+                        .attr('class','svg5');
+
+          ballon5 = 0;
+          rect5 = svg5.selectAll('.MyRect')
+                      .data(gender_type)
+                      .enter().append('rect')
+                      .attr('class',"MyRect")
+                      .attr('transform','translate(' + padding.left + ',' + padding.top + ')')
+                      .attr('fill','steelblue');
+            } else {
+              /* otherwise, select the current bar chart */
+              rect5 = d3.select('#miniChart5')
+                     .select('svg')
+                     .selectAll('.MyRect')
+            }
+
+            /* draw the bar chart */
+          rect5.attr('y', function(d,i){
+                return yScale2(i) + rectPadding/2;
+            })
+              .attr('x', function(d,i){
+                return 0;
+              })
+              .attr('height', 30 - rectPadding)
+              .attr('width', function(d,i){
+                var ind = index('Korea',data)
+                return xScale2(data[ind][d + '_' + type]);
+              })
+
+            /* create x axis */
+          d3.select('#miniChart5').select('svg')
+              .append('g')
+              .attr('class','axis')
+              .attr('transform', "translate(" + padding.left + "," + padding.top + ")")
+              .call(xAxis2);
+            /* add the title showing the country or region name */
+          d3.select('#miniChart5').select('svg')
+              .append('text')
+              .attr('x',(width/2))
+              .attr('y', 10)
+              .attr('text-anchor','middle')
+              .attr('font-size','14px')
+              .text('Korea');
+
+          /* add the subject name for each bar, total, female, male*/
+          d3.select('#miniChart5').select('svg')
+              .selectAll('.type_text')
+              .data(gender_type)
+              .enter()
+              .append('text')
+              .attr('x', 120)
+              .attr('y',function(d,i){
+                return yScale2(i) + margin;
+              })
+              .text(function(d){
+                return d;
+              })
+              .attr('font-size','14px')
+            /* create score labels */
+          if (textbal5 == 1){
+            var text5 = d3.select('#miniChart5').select('svg')
+                          .selectAll('.bartext5')
+                          .data(gender_type)
+                          .enter()
+                          .append('text')
+                          .attr('class','bartext5');
+            textbal5 = 0;
+          }    else {
+            text5 = d3.select('#miniChart5').selectAll('.bartext5');
+          }
+
+          text5.attr('x', function(d){
+                /* got the index of the country */
+                var ind = index('Korea',data)
+                return -10 + xScale2(data[ind][d + '_' + type]);   /* at the right side of the bar*/
+              })
+              .attr('y', function(d,i){
+                return yScale2(i) + margin;    /* same as the corresponding bar */
+              })
+              .attr('font-family','sans-serif')
+              .attr('font-size','11px')
+              .attr('fill','white')
+              .text(function(d,i){
+                /* got the index of the country */
+                var ind = index('Korea',data)
+
+                /* text should be the scores, like, data[3][total_math]*/
+                return data[ind][d + '_' + type].toFixed(2);  
+              }); 
+
+          /*************************************************/
+          /******* create the 6th minichart, Macao ********/
+          /*************************************************/
+
+          var rect6;
+          /* If there is no chart, create a new one; otherwise, just update the current chart */
+          if (ballon6 == 1) {
+            /* if baloon is 1, then create the new chart */
+          var svg6 = d3.select('#miniChart6')
+                        .append('svg')
+                        .attr('width',525)
+                        .attr('height',180)
+                        .attr('class','svg4');
+
+          ballon6 = 0;
+          rect6 = svg6.selectAll('.MyRect')
+                      .data(gender_type)
+                      .enter().append('rect')
+                      .attr('class',"MyRect")
+                      .attr('transform','translate(' + padding.left + ',' + padding.top + ')')
+                      .attr('fill','steelblue');
+            } else {
+              /* otherwise, select the current bar chart */
+              rect6 = d3.select('#miniChart6')
+                     .select('svg')
+                     .selectAll('.MyRect')
+            }
+
+            /* draw the bar chart */
+          rect6.attr('y', function(d,i){
+                return yScale2(i) + rectPadding/2;
+            })
+              .attr('x', function(d,i){
+                return 0;
+              })
+              .attr('height', 30 - rectPadding)
+              .attr('width', function(d,i){
+                var ind = index('Taiwan',data)
+                return xScale2(data[ind][d + '_' + type]);
+              })
+
+            /* create x axis */
+          d3.select('#miniChart6').select('svg')
+              .append('g')
+              .attr('class','axis')
+              .attr('transform', "translate(" + padding.left + "," + padding.top + ")")
+              .call(xAxis2);
+            /* add the title showing the country or region name */
+          d3.select('#miniChart6').select('svg')
+              .append('text')
+              .attr('x',(width/2))
+              .attr('y', 10)
+              .attr('text-anchor','middle')
+              .attr('font-size','14px')
+              .text('Macao');
+
+          /* add the subject name for each bar, total, female, male*/
+          d3.select('#miniChart6').select('svg')
+              .selectAll('.type_text')
+              .data(gender_type)
+              .enter()
+              .append('text')
+              .attr('x', 120)
+              .attr('y',function(d,i){
+                return yScale2(i) + margin;
+              })
+              .text(function(d){
+                return d;
+              })
+              .attr('font-size','14px')
+            /* create score labels */
+          if (textbal6 == 1){
+            var text6 = d3.select('#miniChart6').select('svg')
+                          .selectAll('.bartext6')
+                          .data(gender_type)
+                          .enter()
+                          .append('text')
+                          .attr('class','bartext6');
+            textbal6 = 0;
+          }    else {
+            text6 = d3.select('#miniChart6').selectAll('.bartext6');
+          }
+
+          text6.attr('x', function(d){
+                /* got the index of the country */
+                var ind = index('Macao',data)
+                return -10 + xScale2(data[ind][d + '_' + type]);   /* at the right side of the bar*/
+              })
+              .attr('y', function(d,i){
+                return yScale2(i) + margin;    /* same as the corresponding bar */
+              })
+              .attr('font-family','sans-serif')
+              .attr('font-size','11px')
+              .attr('fill','white')
+              .text(function(d,i){
+                /* got the index of the country */
+                var ind = index('Macao',data)
+
+                /* text should be the scores, like, data[3][total_math]*/
+                return data[ind][d + '_' + type].toFixed(2);  
+              }); 
+          /*************************************************/
+          /******* create the 7th minichart, Japan ********/
+          /*************************************************/
+
+          var rect7;
+          /* If there is no chart, create a new one; otherwise, just update the current chart */
+          if (ballon7 == 1) {
+            /* if baloon is 1, then create the new chart */
+          var svg7 = d3.select('#miniChart7')
+                        .append('svg')
+                        .attr('width',525)
+                        .attr('height',180)
+                        .attr('class','svg7');
+
+          ballon7 = 0;
+          rect7 = svg7.selectAll('.MyRect')
+                      .data(gender_type)
+                      .enter().append('rect')
+                      .attr('class',"MyRect")
+                      .attr('transform','translate(' + padding.left + ',' + padding.top + ')')
+                      .attr('fill','steelblue');
+            } else {
+              /* otherwise, select the current bar chart */
+              rect7 = d3.select('#miniChart7')
+                     .select('svg')
+                     .selectAll('.MyRect')
+            }
+
+            /* draw the bar chart */
+          rect7.attr('y', function(d,i){
+                return yScale2(i) + rectPadding/2;
+            })
+              .attr('x', function(d,i){
+                return 0;
+              })
+              .attr('height', 30 - rectPadding)
+              .attr('width', function(d,i){
+                var ind = index('Japan',data)
+                return xScale2(data[ind][d + '_' + type]);
+              })
+
+            /* create x axis */
+          d3.select('#miniChart7').select('svg')
+              .append('g')
+              .attr('class','axis')
+              .attr('transform', "translate(" + padding.left + "," + padding.top + ")")
+              .call(xAxis2);
+            /* add the title showing the country or region name */
+          d3.select('#miniChart7').select('svg')
+              .append('text')
+              .attr('x',(width/2))
+              .attr('y', 10)
+              .attr('text-anchor','middle')
+              .attr('font-size','14px')
+              .text('Japan');
+
+          /* add the subject name for each bar, total, female, male*/
+          d3.select('#miniChart7').select('svg')
+              .selectAll('.type_text')
+              .data(gender_type)
+              .enter()
+              .append('text')
+              .attr('x', 120)
+              .attr('y',function(d,i){
+                return yScale2(i) + margin;
+              })
+              .text(function(d){
+                return d;
+              })
+              .attr('font-size','14px')
+            /* create score labels */
+          if (textbal7 == 1){
+            var text7 = d3.select('#miniChart7').select('svg')
+                          .selectAll('.bartext7')
+                          .data(gender_type)
+                          .enter()
+                          .append('text')
+                          .attr('class','bartext7');
+            textbal7 = 0;
+          }    else {
+            text7 = d3.select('#miniChart7').selectAll('.bartext7');
+          }
+
+          text7.attr('x', function(d){
+                /* got the index of the country */
+                var ind = index('Japan',data)
+                return -10 + xScale2(data[ind][d + '_' + type]);   /* at the right side of the bar*/
+              })
+              .attr('y', function(d,i){
+                return yScale2(i) + margin;    /* same as the corresponding bar */
+              })
+              .attr('font-family','sans-serif')
+              .attr('font-size','11px')
+              .attr('fill','white')
+              .text(function(d,i){
+                /* got the index of the country */
+                var ind = index('Japan',data)
+
+                /* text should be the scores, like, data[3][total_math]*/
+                return data[ind][d + '_' + type].toFixed(2);  
+              }); 
+            }
+
+        /* create 3 buttons, math, read, scie */
+        var type_buttons = d3.select("#type_buttons")
+                        .append("div")
+                        .attr("class", "type_buttons")
+                        .selectAll("div")
+                        .data(type_list)
+                        .enter()
+                        .append("div")
+                        .text(function(d) {
+                            return d;
+                        });
+
+        /* when clicking buttons, charts would be updated */
+        type_buttons.on("click", function(d) {
+                    d3.select(".type_buttons")
+                      .selectAll("div")
+                      .transition()
+                      .duration(500)
+                      .style("color", "black")
+                      .style("background", "rgb(251, 201, 127)");
+
+                      d3.select(this)
+                      .transition()
+                      .duration(500)
+                      .style("background", "lightBlue")
+                      .style("color", "white");
+                    update(d);
+                });
+      }
+    </script>
+</head>
+<body>
+  <div id = 'container'>
+      <div id = 'mainTitle'></div>
+      <INPUT name="pclog" type="button" value="Go back" onClick="location.href='index_1.html'">
+      <h> charts show total, female and male average scores of each country,respectively, in order to show more exactly which one of them, reading or science, is highly correlated with math performance. We can clearly notice the gender differences. Generally, male students did better in math in economies except Singapore. Female students have better reading capacity in whole 6 economies. Male students in economies except Singapore and Macao performed better in science. It seems that male studnets did better in both science and math, so good performances of science might help lift math scores.  </h>
+
+      <div id = 'mainChart'></div>
+      <div id = 'miniChart'></div>
+      <div id = 'buttons'></div>
+
+      <div id = 'type_buttons'></div>   
+  </div>
+  <div id = 'miniCharts'>
+      <div id = 'miniChart1', class = 'float_chart'></div>
+      <div id = 'miniChart2', class = 'float_chart'></div>
+      <div id = 'miniChart3', class = 'float_chart'></div>
+      <div id = 'miniChart4', class = 'float_chart'></div>
+      <div id = 'miniChart5', class = 'float_chart'></div>
+      <div id = 'miniChart6', class = 'float_chart'></div>
+      <div id = 'miniChart7', class = 'float_chart'></div> 
+  </div>
+  <script type="text/javascript">
+  /*
+    Use D3 to load the GeoJSON file
+    */
+    
+  d3.csv("out2.csv",function(d){
+    d.total_math = +d.total_math;
+    d.total_scie = +d.total_scie;
+    d.total_read = +d.total_read;
+    d.male_scie = +d.male_scie;
+    d.male_read = +d.male_read;
+    d.male_math = +d.male_math;
+    d.female_scie = +d.female_scie;
+    d.female_read = +d.female_read;
+    d.female_math = +d.female_math;
+    return d;
+  }, draw);
+  </script>
+</body>
+</html>

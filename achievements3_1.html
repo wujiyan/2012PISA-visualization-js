@@ -1,0 +1,407 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <script src="http://d3js.org/d3.v3.min.js"></script>
+  <script src="http://dimplejs.org/dist/dimple.v2.0.0.min.js"></script>
+    <style>
+      .MyRect {
+        fill: steelblue;
+      }
+
+      h1.mainhead {
+        text-align: center;
+        color: black;
+      }
+
+      h2.text{
+        text-align:center;
+        color: black;
+      }
+
+      div.country_buttons {
+        position: absolute;
+        left: 5px;
+        width: 100px;
+      }
+
+      div.country_buttons div{
+        background-color: rgb(251, 201, 127);
+        padding: 3px;
+        margin: 7px;
+      }
+      .middle_text {
+        text-anchor: middle;
+      }
+
+      div.tooltip{
+                color:white;
+                background:orange;
+                stroke: black;
+                margin:10px;
+                padding: 10px;
+            }
+
+      }
+    </style>
+    <script type="text/javascript">  
+         /* define a function returning the index of a country
+            input: 
+                country: the country name
+                obj: the data set used
+            output:
+                the index of the country in the obj dataset */
+      function index(obj, country){
+                  for(var i = 0;i < obj.length;i++){
+                    if (obj[i]['country'] == country) {
+                      return i;
+                       }
+                    }
+                  }
+                  
+      var char = function(a,b){if (a-b > 0){
+          return "+";
+        } else {
+          return '';
+        }} 
+
+      function draw(data){
+
+        console.log(data);
+        /* define dimensions */
+        var width = 1500,
+            height = 67 * 30,
+            part1 = 200,
+            part2 = 300;
+        
+        d3.select("#mainTitle")
+          .append("h1")
+          .attr('class','mainhead')
+          .text("Visualization of PISA data");
+
+        /* define the padding for the chart */
+        var padding = {left:30, right:30, top:20, bottom:20}; 
+
+        /* update the dataset recording the ranking based on math, read, scie, respectively */
+        /* rank by math first, and generate the new variable, rank_math */
+        var rank_math = data.sort(function(a,b){
+          return d3.descending(a.total_math, b.total_math)
+        });
+
+        data.forEach(function(d){
+          d['math_rank'] = index(rank_math, d.country) + 1;
+        })
+
+        /* rank by read next, and generate the new variable, rank_read */
+        var rank_read = data.sort(function(a,b){
+          return d3.descending(a.total_read, b.total_read);
+        });
+
+        data.forEach(function(d){
+          d['read_rank'] = index(rank_read, d.country) + 1;
+        })
+
+        /* rank by science next, and generate the new variable, rank_scie */
+        var rank_scie = data.sort(function(a,b){
+          return d3.descending(a.total_scie, b.total_scie)
+        });
+
+        data.forEach(function(d){
+          d['scie_rank'] = index(rank_scie, d.country) + 1;
+        })
+
+
+
+        /* create the main chart */
+        var svg = d3.select('body').select('#mainChart')
+                    .append('svg')
+                    .attr('width', width)
+                    .attr('height', height)
+
+        var tooltip = d3.select('body')
+                        .append('div')
+                        .attr('class','tooltip')
+                        .style('position','absolute')
+                        .style('z-index','1000')
+                        .style('visibility','hidden')
+                        .text('s simpile tooltip')
+
+       
+        /* add lines on the left */
+        var lines_left = svg.selectAll('.lines_left')
+                        .data(data)
+                        .enter()
+                        .append('line')
+                        .attr('class', function(d){
+                          return 'line_' + d.country;
+                        })
+                        .attr('x1',part1)
+                        .attr('x2', part1 + part2)
+                        .attr('y1',function(d){
+                          return 30 * d.read_rank - 20;
+                        })
+                        .attr('y2', function(d){
+                          return 30 * d.math_rank - 20;
+                        })
+                        .attr('stroke-width',2)
+                        .attr('stroke','black')
+                            .on('mouseover',function(d){
+                              console.log(d.country);
+                              d3.selectAll('.line_' + d.country).attr('stroke','red').attr('stroke-width',4);
+                              d3.selectAll('.text_' + d.country).attr('font-weight','bold').attr('fill','red');
+                              var addchar1 = char(d.read_rank,d.math_rank);
+                              var addchar2 = char(d.scie_rank,d.math_rank);
+                              return tooltip.style('visibility','visible')
+                                            .html('<strong><span style = "color:red">country:</span></strong>' 
+                                              + d.country + '<br/>' 
+                                              + '<strong><span style = "color:red">Math ranking:</span></strong>' 
+                                              + d.math_rank + '<br/>'
+                                              + '<strong><span style = "color:red">Read rannking:</span></strong>' 
+                                              + addchar1 + (d.read_rank-d.math_rank) + '<br/>'
+                                              + '<strong><span style = "color:red">Scie rannking:</span></strong>'
+                                              + addchar2 + (d.scie_rank-d.math_rank) + '<br/>');
+                            })
+                            .on('mousemove',function(d){
+                              return tooltip.style('top',(d3.event.pageY-10) + 'px')
+                              .style('left',(d3.event.pageX + 20) + 'px');
+                            })
+                            .on('mouseout', function(d){
+                              d3.selectAll('.line_' + d.country).attr('stroke','black').attr('stroke-width',2);
+                              d3.selectAll('.text_' + d.country).attr('font-weight','').attr('fill','black');
+                              return tooltip.style('visibility','hidden');
+                            })
+        /* add lines on the right */
+        var lines_right = svg.selectAll('.lines_right')
+                              .data(data)
+                              .enter()
+                              .append('line')
+                              .attr('class',function(d){
+                                return 'line_' + d.country;
+                              })
+                              .attr('x1',part1 * 2 + part2)
+                              .attr('x2', part1 * 2 + part2 * 2)
+                              .attr('y1', function(d){
+                                return 30 * d.math_rank - 20;
+                              })
+                              .attr('y2', function(d){
+                                return 30 * d.scie_rank - 20;
+                              })
+                              .attr('stroke-width',2)
+                              .attr('stroke','black')
+                              .on('mouseover',function(d){
+                              console.log(d.country);
+                              d3.selectAll('.line_' + d.country).attr('stroke','red').attr('stroke-width',4);
+                              d3.selectAll('.text_' + d.country).attr('font-weight','bold').attr('fill','red');
+                              var addchar1 = char(d.read_rank,d.math_rank);
+                              var addchar2 = char(d.scie_rank,d.math_rank);
+                              return tooltip.style('visibility','visible')
+                                            .html('<strong><span style = "color:red">country:</span></strong>' 
+                                              + d.country + '<br/>' 
+                                              + '<strong><span style = "color:red">Math ranking:</span></strong>' 
+                                              + d.math_rank + '<br/>'
+                                              + '<strong><span style = "color:red">Read rannking:</span></strong>' 
+                                              + addchar1 + (d.read_rank-d.math_rank) + '<br/>'
+                                              + '<strong><span style = "color:red">Scie rannking:</span></strong>'
+                                              + addchar2 + (d.scie_rank-d.math_rank) + '<br/>');
+                            })
+                            .on('mousemove',function(d){
+                              return tooltip.style('top',(d3.event.pageY-10) + 'px')
+                              .style('left',(d3.event.pageX + 20) + 'px');
+                            })
+                            .on('mouseout', function(d){
+                              d3.selectAll('.line_' + d.country).attr('stroke','black').attr('stroke-width',2);
+                              d3.selectAll('.text_' + d.country).attr('font-weight','').attr('fill','black');
+                              return tooltip.style('visibility','hidden');
+                            })
+
+        /* add texts in the middle */
+        var text_math = svg.selectAll('.middle_text')
+                            .data(data)
+                            .enter()
+                            .append('text')
+                            .attr('class', function(d){
+                              return 'text_' + d.country;
+                            })
+                            .attr('y',function(d){
+                              return 30 * d.math_rank - 15;
+                            })
+                            .attr('x', part1 + part2 + 100)
+                            .attr('font-size', '15px')
+                            .attr('text-anchor', 'middle')
+                            .text(function(d){
+                              return d.country;
+                            })
+                            /* Put the mouse on one of the right texts and highlight its information */
+                            .on('mouseover',function(d){
+                              console.log(d.country);
+                              d3.selectAll('.line_' + d.country).attr('stroke','red').attr('stroke-width',4);
+                              d3.selectAll('.text_' + d.country).attr('font-weight','bold').attr('fill','red');
+                              var addchar1 = char(d.read_rank,d.math_rank);
+                              var addchar2 = char(d.scie_rank,d.math_rank);
+                              return tooltip.style('visibility','visible')
+                                            .html('<strong><span style = "color:red">country:</span></strong>' 
+                                              + d.country + '<br/>' 
+                                              + '<strong><span style = "color:red">Math ranking:</span></strong>' 
+                                              + d.math_rank + '<br/>'
+                                              + '<strong><span style = "color:red">Read rannking:</span></strong>' 
+                                              + addchar1 + (d.read_rank-d.math_rank) + '<br/>'
+                                              + '<strong><span style = "color:red">Scie rannking:</span></strong>'
+                                              + addchar2 + (d.scie_rank-d.math_rank) + '<br/>');
+                            })
+                            .on('mousemove',function(d){
+                              return tooltip.style('top',(d3.event.pageY-10) + 'px')
+                              .style('left',(d3.event.pageX + 20) + 'px');
+                            })
+                            .on('mouseout', function(d){
+                              d3.selectAll('.line_' + d.country).attr('stroke','black').attr('stroke-width',2);
+                              d3.selectAll('.text_' + d.country).attr('font-weight','').attr('fill','black');
+                              return tooltip.style('visibility','hidden');
+                            })
+        /* add texts on the left */
+        var text_read = svg.selectAll('.left_text')
+                            .data(data)
+                            .enter()
+                            .append('text')
+                            .attr('class',function(d){
+                              return 'text_' + d.country;
+                            })
+                            .attr('y',function(d){
+                              return 30 * d.read_rank - 15;
+                            })
+                            .attr('x', 100)
+                            .text(function(d){
+                              return d.country;
+                            })
+                            .attr('font-size', '15px')
+                            .attr('text-anchor', 'middle')
+                            /* Put the mouse on one of the right texts and highlight its information */
+                            .on('mouseover',function(d){
+                              console.log(d.country);
+                              d3.selectAll('.line_' + d.country).attr('stroke','red').attr('stroke-width',4);
+                              d3.selectAll('.text_' + d.country).attr('font-weight','bold').attr('fill','red');
+                              var addchar1 = char(d.read_rank,d.math_rank);
+                              var addchar2 = char(d.scie_rank,d.math_rank);
+                              return tooltip.style('visibility','visible')
+                                            .html('<strong><span style = "color:red">country:</span></strong>' 
+                                              + d.country + '<br/>' 
+                                              + '<strong><span style = "color:red">Math ranking:</span></strong>' 
+                                              + d.math_rank + '<br/>'
+                                              + '<strong><span style = "color:red">Read rannking:</span></strong>' 
+                                              + addchar1 + (d.read_rank-d.math_rank) + '<br/>'
+                                              + '<strong><span style = "color:red">Scie rannking:</span></strong>'
+                                              + addchar2 + (d.scie_rank-d.math_rank) + '<br/>');
+                            })
+                            .on('mousemove',function(d){
+                              return tooltip.style('top',(d3.event.pageY-10) + 'px')
+                              .style('left',(d3.event.pageX + 20) + 'px');
+                            })
+                            .on('mouseout', function(d){
+                              d3.selectAll('.line_' + d.country).attr('stroke','black').attr('stroke-width',2);
+                              d3.selectAll('.text_' + d.country).attr('font-weight','').attr('fill','black');
+                              return tooltip.style('visibility','hidden');
+                            })
+
+        
+        /* add texts on the right */
+        var text_scie = svg.selectAll('.right_text')
+                            .data(data)
+                            .enter()
+                            .append('text')
+                            .attr('class',function(d){
+                              return 'text_' + d.country;
+                            })
+                            .attr('y',function(d){
+                              return 30 * d.scie_rank - 15;
+                            })
+                            .attr('x', 2 * part1 + 2 * part2 + 100)
+                            .text(function(d){
+                              return d.country;
+                            })
+                            .attr('font-size', '15px')
+                            .attr('text-anchor', 'middle')
+                            /* Put the mouse on one of the right texts and highlight its information */
+                            .on('mouseover',function(d){
+                              console.log(d.country);
+                              d3.selectAll('.line_' + d.country).attr('stroke','red').attr('stroke-width',4);
+                              d3.selectAll('.text_' + d.country).attr('font-weight','bold').attr('fill','red');
+                              var addchar1 = char(d.read_rank,d.math_rank);
+                              var addchar2 = char(d.scie_rank,d.math_rank);
+                              return tooltip.style('visibility','visible')
+                                            .html('<strong><span style = "color:red">country:</span></strong>' 
+                                              + d.country + '<br/>' 
+                                              + '<strong><span style = "color:red">Math ranking:</span></strong>' 
+                                              + d.math_rank + '<br/>'
+                                              + '<strong><span style = "color:red">Read rannking:</span></strong>' 
+                                              + addchar1
+                                              + (d.read_rank-d.math_rank) + '<br/>'
+                                              + '<strong><span style = "color:red">Scie rannking:</span></strong>'
+                                              + addchar2 + (d.scie_rank-d.math_rank) + '<br/>');
+
+                            })
+                            .on('mousemove',function(d){
+                              return tooltip.style('top',(d3.event.pageY-10) + 'px')
+                              .style('left',(d3.event.pageX + 20) + 'px');
+                            })
+                            .on('mouseout', function(d){
+                              d3.selectAll('.line_' + d.country).attr('stroke','black').attr('stroke-width',2);
+                              d3.selectAll('.text_' + d.country).attr('font-weight','').attr('fill','black');
+                              return tooltip.style('visibility','hidden');
+                            })
+
+        /* add the labels naming each column, read ranking, math ranking, science ranking */
+        var chart_title = d3.select('#chart_title').append('svg')
+                            .attr('width', width)
+                            .attr('height',50);
+        var label_left = chart_title.append('text')
+                                    .attr('x',100)
+                                    .attr('y',15)
+                                    .text('Read ranking')
+                                    .attr('font-size','20px')
+                                    .attr('font-weight', 'bold')
+                                    .attr('text-anchor','middle')
+        var label_middle = chart_title.append('text')
+                                    .attr('x',100 + part1 + part2)
+                                    .attr('y',15)
+                                    .text('Math ranking')
+                                    .attr('font-size','20px')
+                                    .attr('font-weight', 'bold')
+                                    .attr('text-anchor','middle')
+        var label_right = chart_title.append('text')
+                                    .attr('x',100 + part1 * 2 + part2 * 2)
+                                    .attr('y',15)
+                                    .text('Science ranking')
+                                    .attr('font-size','20px')
+                                    .attr('font-weight', 'bold')
+                                    .attr('text-anchor','middle')
+
+      }
+    </script>
+</head>
+<body>
+  <div id = 'container'>
+      <div id = 'mainTitle'></div>
+      <INPUT name="pclog" type="button" value="Go next" onClick="location.href='achievements2_1.html'">
+      <h> In this page, in order to know more about students' achievements in all subjects of the 6 Asian economies that we paid attention to, I will show you ranking and gender difference of all three subjects, math, reading, and science. Maybe they can further explain why those economies ranked highly on math performances.<br/><br/>As we can see from the ranking part, in Shanghai, Singapore, Hong Kong and Korea, students seemed to perform as well in reading and science as they did in math. Although Taiwan and Macao got good rankings in math, their reading and science abilities are relatively lower. Meanwhile, Japanese students got relatively better rankings in reading and science compared to their math ranking. In general, economies with higher math ranking usually have higher rankings over reading and science. So maybe good reading and science ability have positive effects on math performances </h>
+      <div id = 'chart_title'></div>
+      <div id = 'mainChart'></div>
+  </div>
+  <script type="text/javascript">
+  /*
+    Use D3 to load the GeoJSON file
+    */
+    
+  d3.csv("out2.csv",function(d){
+    d.total_math = +d.total_math;
+    d.total_scie = +d.total_scie;
+    d.total_read = +d.total_read;
+    d.male_scie = +d.male_scie;
+    d.male_read = +d.male_read;
+    d.male_math = +d.male_math;
+    d.female_scie = +d.female_scie;
+    d.female_read = +d.female_read;
+    d.female_math = +d.female_math;
+    return d;
+  }, draw);
+  </script>
+</body>
+</html>
