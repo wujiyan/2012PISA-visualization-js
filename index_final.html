@@ -1,0 +1,789 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <script src="http://d3js.org/d3.v3.min.js"></script>
+  <script src="http://dimplejs.org/dist/dimple.v2.0.0.min.js"></script>
+    <style>
+      .axis path,
+      .axis line{
+        fill: none;
+        stroke:#FF9200;
+        shape-rendering: crispEdges;
+      }
+
+      .axis text{
+        font-family: sans-serif;
+        font-size:11px;
+        fill:#FF9200;
+      }
+
+
+      #pass{
+        background-color: white;
+        stroke: #3F92D4;
+        font-size: 20px;
+        cursor:pointer;
+        color: #3F92D4;
+        font-weight: bold;
+        transform: translate(1020px,0);
+      }
+
+      #mainwords{
+        font-size: 13px;
+        width:60%;
+        margin:auto;
+        text-align: justify;
+      }
+
+      #bar_desc{
+        text-anchor:middle;
+        color:#ff9200;
+        transform:translate(550px,0px);
+        font-weight: bold;
+        font-size:16px;
+      }
+
+      h1.mainhead {
+        text-align: center;
+        color: #0b61a4;
+      }
+
+      h2.text{
+        text-align:center;
+        color: black;
+      }
+
+
+      div.country_buttons div{
+        background-color: rgb(251, 201, 127);
+        padding: 3px;
+        margin: 7px;
+        padding: 3px;
+        margin: 7px;
+      }
+
+      div.sort_button {
+        position: absolute;
+        left: 600px;
+        width: 100px;
+        border-style: groove;
+        margin:40px;
+        padding:20px;
+        cursor:pointer;
+      }
+
+      div.tooltip_pie{
+        color:white;
+        background:#0B61A4;
+        stroke:black;
+        margin:10px;
+        padding:10px;
+      }
+      
+      div.tooltip{
+        color:white;
+        background:orange;
+        stroke: black;
+        margin:10px;
+        padding: 10px;
+            }
+      .legend {
+          font-size: 12px;
+        }
+      rect {
+        stroke-width: 2;
+      }
+    </style>
+    <script type="text/javascript"> 
+    /* set the boolean variable for drawing pie chart */
+    /* if pie_ballon is 1, create new svg. Otherwise, select existing svg. */
+    var pie_ballon = 1;
+
+      /* load the out4.csv and draw it */
+      function draw_pie(country){
+
+        /* get the country name */
+        var country_name = country;
+
+        /* draw pie chart */
+        function draw(data){
+          console.log(data);
+
+          /* group data by country name */
+          var nested = d3.nest()
+                          .key(function(d){
+                            return d.Location;
+                          })
+                          .entries(data);
+
+          /* get the dataset with respect to the specific country we clicked*/
+          var filtered = nested.filter(function(d){
+            return d['key'] === country_name;
+          })  
+
+          /* dataset regarding outcome of the first question */
+
+          var dataset1 = [];
+          var sum1 = 0;
+
+          for ( i = 1; i < 5; i++){
+            dataset1.push(filtered[0].values[i].Q1);
+            sum1 = sum1 + filtered[0].values[i].Q1;
+          }
+
+          /* dataset regarding outcome of the second question */
+          var dataset2 = [];
+          var sum2 = 0;
+
+          for ( i = 1; i < 5; i++){
+            dataset2.push(filtered[0].values[i].Q2);
+            sum2 = sum2 + filtered[0].values[i].Q2;
+          }
+
+          /* dataset regarding outcome of the third question */
+          var dataset3 = [];
+          var sum3 = 0;
+
+          for ( i = 1; i < 5; i++){
+            dataset3.push(filtered[0].values[i].Q3);
+            sum3 = sum3 + filtered[0].values[i].Q3;
+          }
+
+          /* dataset regarding outcome of the fourth question */
+          var dataset4 = [];
+          var sum4 = 0;
+
+          for ( i = 1; i < 5; i++){
+            dataset4.push(filtered[0].values[i].Q4);
+            sum4 = sum4 + filtered[0].values[i].Q4;
+          }
+
+          /* width and height of the svg */
+          var width = 1400,
+              height = 300;
+
+          /* outer radius and inner radius for the pie */
+          var outerRadius =100,
+              innerRadius = 60; 
+
+          /* if pie ballon == 1, create new svg and draw them */
+          if (pie_ballon == 1){
+            /* set the boolean variable to 0 since we have created new svg */
+            pie_ballon = 0;
+            /* select minichart to create a svg */
+            var svg = d3.select('#miniChart')
+                    .append('svg')
+                    .attr('width', width)
+                    .attr('height', height);
+
+            /* the following are the titles for each pie chart */
+            svg.append('text')
+                .attr('x',2*outerRadius)
+                .attr('y',230)
+                .attr('text-anchor','middle')
+                .style('font-size','14px')
+                .text('Talk about math with friends')
+                .style('fill','#66a3d2');
+
+
+            svg.append('text')
+                .attr('x',2*outerRadius)
+                .attr('y',280)
+                .attr('text-anchor','middle')
+                .style('font-size','14px')
+                .text('Talk about math with friends')
+                .style('fill','#66a3d2');
+
+            svg.append('text')
+                .attr('x',4.5*outerRadius)
+                .attr('y',280)
+                .attr('text-anchor','middle')
+                .style('font-size','14px')
+                .text('Help friends with math')
+                .style('fill','#66a3d2');
+
+            svg.append('text')
+                .attr('x',6.9*outerRadius)
+                .attr('y',280)
+                .attr('text-anchor','middle')
+                .style('font-size','14px')
+                .text('<Extracurricular> Activity')
+                .style('fill','#66a3d2');
+
+            svg.append('text')
+                .attr('x',9.3*outerRadius)
+                .attr('y',280)
+                .attr('text-anchor','middle')
+                .style('font-size','14px')
+                .text('Study More Than 2 Extra Hours a Day')
+                .style('fill','#66a3d2');
+
+
+
+            /* define the radius */
+            var arc = d3.svg.arc()
+                          .outerRadius(outerRadius)
+                          .innerRadius(innerRadius);
+            /* define the color scale */
+            var color = d3.scale.ordinal()
+                            .range(['#BF8230','#FF9200', '#FFAD40', '#FFC373']);
+
+            /***************************draw the first chart***************************/
+            /* start and end angles of segments */
+            var pie = d3.layout.pie(dataset1);
+            /* bind data and locate it*/
+            var arcs1 = svg.selectAll('.MyPie')
+                      .data(pie(dataset1))
+                      .enter()
+                      .append('g')
+                      .attr('class','pie1')
+                      .attr('transform','translate('+2 * outerRadius + ',' + outerRadius*1.5 + ')');
+
+            arcs1.append('path')
+              .attr('fill',function(d,i){   /* fill each segment */
+                return color(i);
+              })
+              .attr('d',function(d){
+                return arc(d);
+              })
+              .attr('stroke','#66B3FF')
+
+            /* append a text but do not write words at this time */
+            var arc1_text = arcs1.append('text');
+
+            /***********************************draw the second chart***********************/
+            var pie2 = d3.layout.pie(dataset2);
+
+            var arcs2 = svg.selectAll('.MyPie')
+                      .data(pie2(dataset2))
+                      .enter()
+                      .append('g')
+                      .attr('class','pie2')
+                      .attr('transform','translate('+4.5 * outerRadius + ',' + outerRadius*1.5 + ')');
+
+            arcs2.append('path')
+              .attr('fill',function(d,i){
+                return color(i);
+              })
+              .attr('d',function(d){
+                return arc(d);
+              })
+              .attr('stroke','#66B3FF')
+
+            var arc2_text = arcs2.append('text');
+
+            /***********************************draw the third chart***********************/
+            var pie3 = d3.layout.pie(dataset3);
+
+            var arcs3 = svg.selectAll('.MyPie')
+                      .data(pie3(dataset3))
+                      .enter()
+                      .append('g')
+                      .attr('class','pie3')
+                      .attr('transform','translate('+6.9 * outerRadius + ',' + outerRadius*1.5 + ')');
+
+            arcs3.append('path')
+              .attr('fill',function(d,i){
+                return color(i);
+              })
+              .attr('d',function(d){
+                return arc(d);
+              })
+              .attr('stroke','#66B3FF')
+
+            var arc3_text = arcs3.append('text');
+
+            /***********************************draw the fourth chart***********************/
+            var pie4 = d3.layout.pie(dataset4);
+
+            var arc4 = d3.svg.arc()
+                      .outerRadius(outerRadius)
+                      .innerRadius(innerRadius);
+
+            var arcs4 = svg.selectAll('.MyPie')
+                      .data(pie4(dataset4))
+                      .enter()
+                      .append('g')
+                      .attr('class','pie4')
+                      .attr('transform','translate('+9.3 * outerRadius + ',' + outerRadius*1.5 + ')');
+
+            arcs4.append('path')
+              .attr('fill',function(d,i){
+                return color(i);
+              })
+              .attr('d',function(d){
+                return arc(d);
+              })
+              .attr('stroke','#66B3FF')
+
+            var arc4_text = arcs4.append('text');
+
+
+            /* draw the legend */
+            var legendRctSize = 18;  /* legend size */
+            var legendSpacing = 4;   /* legend space */
+            /* create legend elements */
+            var legend = d3.select('#miniChart').select('svg')
+                          .selectAll('.legend')
+                          .data(color.domain())
+                          .enter()
+                          .append('g')
+                          .attr('class','legend')
+                          .attr('transform', function(d,i){
+                            var height = legendRctSize + legendSpacing;
+                            var offset = height * color.domain().length/2;
+                            var horz = 1100;
+                            var vert = i * height + 100;
+                            return 'translate(' + horz + ',' + vert + ')';
+                          });
+            /* draw legend rects */
+            legend.append('rect')
+                .attr('width', legendRctSize)
+                .attr('height', legendRctSize)
+                .style('fill', color)
+                .style('stroke', color);
+            /* define legend texts */
+            var legend_txt = ['Always or almost always', 'Often', 'Sometimes','Never or rarely']
+            /* append text for each legend rect */
+            legend.append('text')
+                .attr('x', legendRctSize + legendSpacing)
+                .attr('y', legendRctSize - legendSpacing)
+                .text(function(d,i){
+                  return legend_txt[i];
+                });
+
+            /* add a title for the whole pie charts */
+            d3.select("#minititle")
+              .append("h2")
+              .attr('class','title')
+              .text("Students' math behaviors in " + country)
+              .style('text-align','center')
+              .style('font-size','20px');
+
+          } else {/* boolean variable is 0, so just select existing elements */
+            var arc = d3.svg.arc()
+                        .outerRadius(outerRadius)
+                        .innerRadius(innerRadius);
+
+            var pie = d3.layout.pie(dataset1);
+            var pie2 = d3.layout.pie(dataset2);
+            var pie3 = d3.layout.pie(dataset3);
+            var pie4 = d3.layout.pie(dataset4);
+            /****************************select every element of the first chart****************************/           
+            arcs1 = d3.selectAll('.pie1')
+                      .data(pie(dataset1))
+                      .select('path')
+                      .attr('d', function(d){
+                        return arc(d);
+                      })
+
+            arc1_text = d3.selectAll('.pie1').select('text');
+            /****************************select every element of the secong chart****************************/   
+            arcs2 = d3.selectAll('.pie2')
+                      .data(pie2(dataset2))
+                      .select('path')
+                      .attr('d', function(d){
+                        return arc(d);
+                      })
+
+            arc2_text = d3.selectAll('.pie2').select('text');
+            /****************************select every element of the third chart****************************/   
+            arcs3 = d3.selectAll('.pie3')
+                      .data(pie3(dataset3))
+                      .select('path')
+                      .attr('d', function(d){
+                        return arc(d);
+                      })
+
+            arc3_text = d3.selectAll('.pie3').select('text');
+            /****************************select every element of the fourth chart****************************/   
+            arcs4 = d3.selectAll('.pie4')
+                      .data(pie4(dataset4))
+                      .select('path')
+                      .attr('d', function(d){
+                        return arc(d);
+                      })
+
+            arc4_text = d3.selectAll('.pie4').select('text');
+          }
+
+         /* text element has been selected or created, so write words in it */
+          arc1_text.attr('transform', function(d){
+                return "translate(" + arc.centroid(d) + ')';
+              })  /* locate the text at the gravity central of the arc */
+              .attr('text-anchor','middle')
+              .attr('font-size',16);
+
+          arc2_text.attr('transform', function(d){
+                return "translate(" + arc.centroid(d) + ')';
+              })
+              .attr('text-anchor','middle')
+              .attr('font-size',16);
+
+          arc3_text.attr('transform', function(d){
+                return "translate(" + arc.centroid(d) + ')';
+              })
+              .attr('text-anchor','middle')
+              .attr('font-size',16);
+
+          arc4_text.attr('transform', function(d){
+                return "translate(" + arc.centroid(d) + ')';
+              })
+              .attr('text-anchor','middle')
+              .attr('font-size',16);
+
+          /* tooltip for hovering information box */
+          var tooltip = d3.select('body')
+                        .append('div')
+                        .attr('class','tooltip_pie')
+                        .style('position','absolute')
+                        .style('z-index','1000')
+                        .style('visibility','hidden')
+                        .text('s simpile tooltip') ;         
+          /* set animations for the 1st pie chart */
+          arcs1.on('mouseover', function(d){
+            return tooltip.style('visibility','visible')
+                        .html('<strong><span style = "color:white">Percentage:</span></strong>' 
+                              + (Number(d.value)/sum1 * 100).toFixed(2) + "%" + '<br/>' 
+                              + '<strong><span style = "color:white">Number:</span></strong>' 
+                              + d.value);  
+          })
+          .on('mousemove',function(d){
+                              return tooltip.style('top',(d3.event.pageY-10) + 'px')
+                              .style('left',(d3.event.pageX + 20) + 'px');
+                            })
+          .on('mouseout',function(){
+            d3.select(this)
+              .transition()
+              .duration(200)
+              .attr('stroke','#66B3FF')
+              return tooltip.style('visibility','hidden');
+          })
+          /* set animations for the 2nd pie chart */
+          arcs2.on('mouseover', function(d){
+            return tooltip.style('visibility','visible')
+                        .html('<strong><span style = "color:white">Percentage:</span></strong>' 
+                              + (Number(d.value)/sum2 * 100).toFixed(2) + "%" + '<br/>' 
+                              + '<strong><span style = "color:white">Number:</span></strong>' 
+                              + d.value);  
+          })
+          .on('mousemove',function(d){
+                              return tooltip.style('top',(d3.event.pageY-10) + 'px')
+                              .style('left',(d3.event.pageX + 20) + 'px');
+                            })
+          .on('mouseout',function(){
+            d3.select(this)
+              .transition()
+              .duration(200)
+              .attr('stroke','#66B3FF')
+              return tooltip.style('visibility','hidden');
+          })
+          /* set animations for the 3rd pie chart */
+          arcs3.on('mouseover', function(d){
+            return tooltip.style('visibility','visible')
+                        .html('<strong><span style = "color:white">Percentage:</span></strong>' 
+                              + (Number(d.value)/sum3 * 100).toFixed(2) + "%" + '<br/>' 
+                              + '<strong><span style = "color:white">Number:</span></strong>' 
+                              + d.value);  
+          })
+          .on('mousemove',function(d){
+                              return tooltip.style('top',(d3.event.pageY-10) + 'px')
+                              .style('left',(d3.event.pageX + 20) + 'px');
+                            })
+          .on('mouseout',function(){
+            d3.select(this)
+              .transition()
+              .duration(200)
+              .attr('stroke','#66B3FF')
+              return tooltip.style('visibility','hidden');
+          })
+          /* set animations for the 4th pie chart */
+          arcs4.on('mouseover', function(d){
+            return tooltip.style('visibility','visible')
+                        .html('<strong><span style = "color:white">Percentage:</span></strong>' 
+                              + (Number(d.value)/sum4 * 100).toFixed(2) + "%" + '<br/>' 
+                              + '<strong><span style = "color:white">Number:</span></strong>' 
+                              + d.value);  
+          })
+          .on('mousemove',function(d){
+                              return tooltip.style('top',(d3.event.pageY-10) + 'px')
+                              .style('left',(d3.event.pageX + 20) + 'px');
+                            })
+          .on('mouseout',function(){
+            d3.select(this)
+              .transition()
+              .duration(200)
+              .attr('stroke','#66B3FF')
+              return tooltip.style('visibility','hidden');
+          })
+
+          /* add a title for the whole pie charts */  
+          d3.select('#miniChart').select('svg').select('text')
+                .attr('x',(width/2))
+                .attr('y', 30)
+                .attr('text-anchor','middle')
+                .style('font-size','16px')
+                .style('font-weight','bold')
+                .text("Students' math behaviors in " + country)
+                .style('fill','#3F92d2');
+
+
+        }
+
+        /* load the dataset and draw pie charts */
+        d3.csv("out4.csv",function(d){
+          d.Q1 = +d.Q1;
+          d.Q2 = +d.Q2;
+          d.Q3 = +d.Q3;
+          d.Q4 = +d.Q4;
+          return d;
+        },draw);
+      }
+
+
+      /* this function is to draw bar charts */
+      function draw(data){
+
+        console.log(data);
+        /* dimension of the svg */
+        var width = 1400,
+            height = 690;
+        /* add a main title */
+        d3.select("#mainTitle")
+          .append("h1")
+          .attr('class','mainhead')
+          .text("Visualization of PISA data");
+
+        /* tooltip for hovering information box */
+        var tooltip = d3.select('body')
+                        .append('div')
+                        .attr('class','tooltip')
+                        .style('position','absolute')
+                        .style('z-index','1000')
+                        .style('visibility','hidden')
+                        .text('s simpile tooltip');
+        /* create a svg */
+        var svg = d3.select("#mainChart")
+            .append("svg")
+            .attr("width", width)
+            .attr("height", height);
+
+        var padding = {left:30, right:30, top:20, bottom:20};
+
+        /* set x scale */
+        var xScale = d3.scale.ordinal()
+        .domain(d3.range(data.length))
+        .rangeRoundBands([0, width-padding.left-padding.right]);
+        /* set y scale */
+        var yScale = d3.scale.linear()
+        .domain([0,650])
+        .range([height-padding.top-padding.bottom, 0]);
+        /* x axis */
+        var xAxis = d3.svg.axis()
+        .scale(xScale)
+        .orient("bottom");
+        /* y axis */
+        var yAxis = d3.svg.axis()
+        .scale(yScale)
+        .orient('left');
+
+        var rectPadding = 4;
+        /* create rects */
+        var rects = svg.selectAll('.MyRect')
+        .data(data)
+        .enter()
+        .append('rect')
+        .attr('class','MyRect')
+        .attr('transform','translate(' + padding.left + ',' + padding.top + ')')
+        .attr('x', function(d,i){
+          return xScale(i) + rectPadding/2;
+        })
+        .attr('y', function(d,i){
+          return yScale(d['total_math']);
+        })
+        .attr('width', xScale.rangeBand() - rectPadding)
+        .attr('height', function(d){
+          return height-padding.top-padding.bottom-yScale(d['total_math']);
+        })
+        .attr('fill',function(d){  /* color each bar by continent */
+          if(d.Continent == 'Europe'){
+            return '#2C858D';
+          } else {
+            if(d.Continent == 'South_America'){
+              return '#74CEB7';
+            } else {
+              if(d.Continent == 'Oceania&Africa'){
+                return '#004056';
+              } else {
+                if(d.Continent == 'North_America'){
+                  return '#C9FFD5';
+                } else {
+                  return '#FFFFCB';
+                }
+              }
+            }
+          }
+        })
+        .attr('cursor','pointer')
+        .attr('stroke','#66B3FF')
+        .on('mouseover',function(d,i){   /* set animations */
+          d3.select(this)
+            .attr('stroke','#DB6C0F');
+          return tooltip.style('visibility','visible')
+                        .html('<strong><span style = "color:red">Click me to find more</span></strong><br/>'
+                              + '<strong><span style = "color:#3F92D2">country:</span></strong>' 
+                              + d.country + '<br/>' 
+                              + '<strong><span style = "color:#3F92D2">Math score:</span></strong>' 
+                              + d.total_math.toFixed(2));            
+            })
+        .on('mousemove',function(d){
+                              return tooltip.style('top',(d3.event.pageY-10) + 'px')
+                              .style('left',(d3.event.pageX + 20) + 'px');
+                            })
+        .on('mouseout',function(){
+          d3.select(this)
+            .transition()
+            .duration(200)
+            .attr('stroke','#66B3FF')
+            return tooltip.style('visibility','hidden');
+        })
+        .on('click', function(d){ /* click the bar and trigger the draw_pie function to show the pie charts */
+          var country = d.country;   /* this variable is passed over to the next function in order to filt data */
+          draw_pie(country);
+        })
+            
+        /* draw legend */
+        var legendRctSize = 18;
+        var legendSpacing = 4;
+
+        /* define the color scale */
+        var color2 = d3.scale.ordinal()
+                      .range(['#004056','#2C858D','#74CEB7','#C9FFD5','#FFFFCB']);
+        /* legend txt */
+        var legend_txt = ['Oceania$Africa','Europe','South America',  'North America','Asia'];
+        /* create legend rects */
+        var legend = svg.selectAll('.legend')
+                        .data(legend_txt)
+                        .enter()
+                        .append('rect')
+                        .attr('width', legendRctSize)
+                        .attr('height', legendRctSize)
+                        .attr('transform',function(d,i){
+                          return 'translate(' + (120*i+420) + ',15)';
+                        })
+                        .style('fill', color2)
+                        .style('stroke', color2);  
+        /* create legend txt */
+        var legend_txt = svg.selectAll('.legend_txt')
+                            .data(legend_txt)
+                            .enter()
+                            .append('text')
+                            .text(function(d){
+                              return d;
+                            }) 
+                            .attr('transform',function(d,i){
+                              return 'translate(' + (445+120*i) +',27)'
+                            })
+                            .style('font-size','12px')
+                            .style('fill','#3F92D2');
+
+        /* add the yaxis for the main chart */
+        svg.append('g')
+        .attr('class','axis')
+        .attr('transform', "translate(" + padding.left + "," + padding.top + ")")
+        .call(yAxis)
+        .append('text')
+        .text('Math Score')
+        .attr('transform','rotate(-90)')
+        .attr('text-anchor','end')
+        .style('font-size','30px')
+        .style('font-weight','bold')
+        .attr('dy','1em');
+
+        /* add sort buttons in order to trigger the sort function */
+        var sort_button = d3.select('#sort_button')
+                          .append('div')
+                          .attr("class", "sort_button")
+                          .text("sort the data")
+                          .style('color','white')
+                          .style('background-color','#FF9200');
+        
+        /* when hovering sort button, color would be change to highlight it */
+        sort_button.on('mousemove', function(){
+          d3.select(this)
+            .style('background-color','#BF8230')
+            .style('color','#FFC373')
+        })
+        .on('mouseout',function(){
+          d3.select(this)
+            .style('background-color','#FF9200')
+            .style('color','white')
+        })
+        .on('click', function(){
+            sortBars();
+        });
+
+      /* create a function to sort the data by total_math */
+      /* if sortOrder == 0, descending. Otherwise, ascending */
+      var sortOrder = false;
+      var sortBars = function(){
+
+          sortOrder = !sortOrder;
+          svg.selectAll('.MyRect')
+            .sort(function(a,b){
+              if (sortOrder){
+                return d3.descending(a.total_math,b.total_math);
+              } else {
+                return d3.ascending(a.total_math,b.total_math);
+                }
+              })
+            .transition()
+            .delay(function(d,i){   /* every bar starts to move 5ms after the previous bar */
+              return i *5;
+            })
+            .duration(100)
+            .attr('x',function(d,i){
+              return xScale(i) + rectPadding/2;
+            });
+        };
+
+      /* add a title for the main chart */
+      d3.select('#bar_desc').append('text')
+        .text('Average math scores across countries');
+      }
+
+
+    </script>
+</head>
+<body>
+  <div id = 'container'>
+      <div id = 'mainTitle'></div>
+      <div id = 'mainwords'> The Programme for International Student Assessment (PISA) is a triennial international survey which aims to evaluate education systems worldwide by testing the skills and knowledge of 15-year-old students. The data I used was assessed in 2012, having investigated around 510000 students in 65 economies, regarding reading, science and math ability. <br/><br/>Firstly I paid attention to the average math scores and was curious about which countries ranked the top. Clicking the "sort the data" button, we can find that of the 7 top economies, 6 are of east or south east asian economies(Chinese cultural circle). Shanghai is way ahead of the rest. Singapore, Hong Kong, Taiwan and Korean are on the second level, whose scores are over 550. Macao and Japan are on the third level. Why was that? I guess one reason is that students are hard-working. <br/><br/><span style = "text-decoration:underline">Click each bar, and you can find some student's math behaviors with respect to the specific economy you selected.</span> We could find that participation of math behaviors are raletively higher in the 6 Chinese cultural circle economies compared to others. There are some countries, like UAE, having pretty high participation of math behaviors, but their average math scores are not that high, so the math behaviors can be taken as a reference but is not the sole and leading factor determining average math score. Students in the 6 Chinese cultural circle economies have stronger intention and actively joined in math activities. </div>
+      <INPUT id = 'pass', name="pclog" type="button" value="Go next" onClick="location.href='achievements2_final.html'">
+      <div id = 'miniChart'></div>
+      <div id = 'bar_desc'></div>
+      <div id = 'sort_button'></div>
+      <div id = 'mainChart'></div>
+  </div>
+  <script type="text/javascript">
+
+  /*
+    Use D3 to load the GeoJSON file
+    */
+    
+  d3.csv("out2.csv",function(d){
+    d.total_math = +d.total_math;
+    d.total_scie = +d.total_scie;
+    d.total_read = +d.total_read;
+    d.male_scie = +d.male_scie;
+    d.male_read = +d.male_read;
+    d.male_math = +d.male_math;
+    d.female_scie = +d.female_scie;
+    d.female_read = +d.female_read;
+    d.female_math = +d.female_math;
+    return d;
+  }, draw);
+  </script>
+</body>
+</htm
