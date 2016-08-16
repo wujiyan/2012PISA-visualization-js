@@ -21,4 +21,14 @@ The Programme for International Student Assessment (PISA) is a triennial interna
 2. In order to find a country that we are interested in, bar charts on the first page have been grouped by continent and colored by blue of different level. 
 3. All buttons will change their color if we hovor mouse over them so that we could know the mouse is over this button.
 4. Cursor will shift into a pointer when hovering over a element if it can be clicked.
+
 ##Feedbacks
+Yan Yu: You would better add some pie charts to show outcomes of questionary. That would be better for us to learn more from students behaviors on math. 
+
+As a response to his suggestion, I picked up four factors and cleaned the dataset again. I drew pie charts and linked the pie charts to bar chart. 
+
+Teng Zhongwei: First of all, I do not understand what the science and reading ranking showed in the formation box on the second page mean. Secondly, the content is too disperse. You would better merge the second and third page into one page. 
+
+As a response to his suggestions, I add more descriptive words to explain what the values mean. Meanwhile, I merged the second and third pages into one. 
+
+
