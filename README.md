@@ -31,4 +31,20 @@ Teng Zhongwei: First of all, I do not understand what the science and reading ra
 
 As a response to his suggestions, I add more descriptive words to explain what the values mean. Meanwhile, I merged the second and third pages into one. 
 
+Tomkaka: It is hard for me observe countries in the bar chart. Maybe you should colored bars by country's continent so that I can observe them without hovering mouse. Then,if you clearly represent the selected bar with a different contrasting color than the blue which is for all the bars then it will be much clear. Next, I don't know that I could click bars to show pie charts. Besides, some color selections should be adjusted in order to make it genderer, and the axis tick marks are merging in between each other and hence it's not clear.
+
+As a response to his suggestion, I colored each economy on the first page by different colors so that we could clearly see Asian ecocnomies ranked the highest. I changed a different contrasting color than the blue. I add a text "Click me to find more" with red in the information box to notify users to click bars. I also changed tick numbers and made some adjustments to color selection to make it look better.
+
+##Resource
+http://bl.ocks.org/mbostock/3885705
+http://www.d3noob.org/2013/02/update-d3js-data-dynamically-button.html
+http://stackoverflow.com/questions/18057917/adding-label-on-a-d3-bar-chart
+http://plnkr.co/edit/JpVkqaZ1AmFdBbOMwMup?p=preview
+http://www.oxxostudio.tw/articles/201411/svg-d3-04-axis.html
+http://canvasjs.com/html5-javascript-pie-chart/
+https://bl.ocks.org/mbostock/3883245
+http://zeroviscosity.com/d3-js-step-by-step/step-1-a-basic-pie-chart
+http://www.d3noob.org/2013/01/adding-title-to-your-d3js-graph.html
+https://chartio.com/resources/tutorials/how-to-show-data-on-mouseover-in-d3js
+http://c3js.org/examples.html
 
